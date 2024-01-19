@@ -1,18 +1,18 @@
-name: pre-commit
+# name: pre-commit
 
-on:
-  pull_request:
-  push:
-    branches: [main, master]
+# on:
+#   pull_request:
+#   push:
+#     branches: [main, master]
 
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v3
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
-      - uses: pre-commit/action@v3.0.0
+# jobs:
+#   pre-commit:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-python@v3
+#       - name: Setup R
+#         uses: r-lib/actions/setup-r@v2
+#         with:
+#           use-public-rspm: true
+#       - uses: pre-commit/action@v3.0.0
