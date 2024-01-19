@@ -1,7 +1,7 @@
 ## custom
 /exploratory/
-/doc/
 /documents/
+/docs/
 
 ## editors
 .vscode
@@ -14,3 +14,4 @@
 .DS_Store
 inst/doc
 /Meta/
+/doc/

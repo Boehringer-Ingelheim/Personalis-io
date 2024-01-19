@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette demonstrates how to use the {MAEio} package to load Personalis 
+This vignette demonstrates how to use the {Personalis-io} package to load Personalis 
 data into a {MultiAssayExperiment} object. 
 
 ```{r setup}
@@ -35,7 +35,7 @@ into a single object, we need a list of patient directories:
 ```{r}
 path <- Sys.getenv("PERSONALIS_PATH")
 sample_list <- list.files(path, full.names = TRUE) |> keep(dir.exists)
-sample_list[1:5]
+sample_list
 ```
 
 
@@ -134,12 +134,16 @@ Each cell of the matrix is a data frame with all clones for the respective patie
  
 ```{r}
 tcr <- assay(mae, "tcr")
-tcr
+class(tcr)
+colnames(tcr)
+rownames(tcr)
 ```
 
 It is possible to retrieve this data frame for a single chain and patient: 
 ```{r}
-tcr["TRA", "K13T"] |> as_tibble()
+tcr["TRA", "sample1"] |>
+  as_tibble() |>
+  select(-Clonal.Sequence)
 ```
 
 We can also slice the matrix for a single variable, e.g. we can use this to retrieve only
@@ -147,7 +151,7 @@ the CDR3 amino acid sequence for all clones. This results in another bumpy matri
 now every cell of the matrix is a character vector instead of a data frame. 
 
 ```{r}
-tcr[, , "CDR3 Amino Acid Sequence"]
+tcr[, , "Top V Hits"]
 ```
 
 Finally, and arguably most useful for us, it is also possible to convert the bumpy matrix back into
@@ -155,5 +159,7 @@ a long-form data frame. Here, the column and rownames are added as additional co
 data frame: 
 
 ```{r}
-BumpyMatrix::unsplitAsDataFrame(tcr) |> as_tibble()
+BumpyMatrix::unsplitAsDataFrame(tcr) |>
+  as_tibble() |>
+  select(-Clonal.Sequence)
 ```
