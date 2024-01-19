@@ -42,7 +42,7 @@ catch_file_not_found <- function(path, callback, ...) {
 warn_missing_samples <- function(sample_list, sample_paths, mod_name) {
   failed_sample_mask <- vapply(sample_list, is.null, logical(1))
   lapply(sample_paths[failed_sample_mask], function(path) {
-    message(sprintf("⚠️  No gene %s found for %s. Sample ignored.", mod_name, basename(path)))
+    message(sprintf("️\u26A0\uFE0F No gene %s found for %s. Sample ignored.", mod_name, basename(path)))
   })
   if (sum(failed_sample_mask)) {
     warning(sprintf("%i %s sample(s) were not found. Please check the log for details.", sum(failed_sample_mask), mod_name))

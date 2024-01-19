@@ -1,18 +1,12 @@
 Package: MAEio
 Title: Read Various Data Sources into MultiAssayExperiment objects 
-Version: 0.0.0.9000
+Version: 0.1.9000
 Authors@R: 
     person("Gregor", "Sturm", , "gregor.sturm@boehringer-ingelheim.com", role = c("aut", "cre"))
-Description: Read Various Data Sources into MultiAssayExperiment objects
+Description: This package provides convenience functions for reading real-world evidence data provided by Personalis into Bioconductor MultiAssayExperiment objects.
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-Suggests: 
-    knitr,
-    rmarkdown,
-    purrr,
-    conflicted,
-    testthat (>= 3.0.0)
+RoxygenNote: 7.3.0
 Depends:
     SummarizedExperiment,
     readxl,
@@ -24,6 +18,11 @@ Depends:
     dplyr,
     BumpyMatrix,
     rvest
+Suggests: 
+    knitr,
+    rmarkdown,
+    conflicted,
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 biocViews:
 VignetteBuilder: knitr
