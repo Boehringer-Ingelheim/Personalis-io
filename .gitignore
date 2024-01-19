@@ -1,11 +1,20 @@
+## custom
+/exploratory/
+/doc/
+
+## editors
+.vscode
+
+## R
 .Rproj.user
 .Rhistory
 .Rdata
 .httr-oauth
 .DS_Store
-.vscode
 inst/doc
-/doc/
 /Meta/
+<<<<<<< HEAD
 
 /exploratory/
+=======
+>>>>>>> 9a40da3 (Add files from internal repo)

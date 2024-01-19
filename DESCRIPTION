@@ -1,0 +1,29 @@
+Package: MAEio
+Title: Read Various Data Sources into MultiAssayExperiment objects 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Gregor", "Sturm", , "gregor.sturm@boehringer-ingelheim.com", role = c("aut", "cre"))
+Description: Read Various Data Sources into MultiAssayExperiment objects
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown,
+    purrr,
+    conflicted,
+    testthat (>= 3.0.0)
+Depends:
+    SummarizedExperiment,
+    readxl,
+    MultiAssayExperiment,
+    tibble,
+    pbapply,
+    tidyr,
+    purrr,
+    dplyr,
+    BumpyMatrix,
+    rvest
+Config/testthat/edition: 3
+biocViews:
+VignetteBuilder: knitr

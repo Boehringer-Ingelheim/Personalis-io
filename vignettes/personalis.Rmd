@@ -1,0 +1,159 @@
+---
+title: "Loading Personalis data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Loading Personalis data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette demonstrates how to use the {MAEio} package to load Personalis 
+data into a {MultiAssayExperiment} object. 
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(MAEio)
+  library(purrr)
+  library(conflicted)
+  conflicts_prefer(base::setdiff)
+})
+```
+
+Personalis ship their data in a (more or less) standardized directory structure 
+within one folder for each patient. The MAEio loader functions traverse this directory
+structure and extract the different modalities. To load data from multiple patients 
+into a single object, we need a list of patient directories: 
+
+
+```{r}
+path <- Sys.getenv("PERSONALIS_PATH")
+sample_list <- list.files(path, full.names = TRUE) |> keep(dir.exists)
+sample_list[1:5]
+```
+
+
+## Reading single modalities into a SummarizedExperiment
+
+We can now read a single modality into a {SummarizedExperiment}. For instance, to read gene expression data
+only.
+
+```{r}
+personalis_gex <- MAEio::read_personalis_gene_expression(sample_list)
+```
+
+By inspecting the object, we can see, this imported gene expression data from 20 patients and ~23k genes. 
+There are three different assays: `counts`, `tpm` and `normCounts`: 
+
+```{r}
+personalis_gex
+```
+
+The following functions to load individual modalities exist, and they all return a {SummarizedExperiment}:
+
+```
+read_personalis_gene_expression
+read_personalis_small_variant_reports
+read_personalis_cnv_reports
+read_personalis_hla_reports
+read_personalis_tcr_reports
+read_personalis_msi_reports
+```
+
+## Reading multiple modalities into a MultiAssayExperiment
+
+To import all modalities at once, we can use the `read_personalis` function. 
+Not all modalities may be present for all samples. Some may not be present in 
+any sample of the dataset. This is shown as warnings during the import process. 
+It is your repsonsibility to check the warnings carefully to make sure that
+all data that you expect to be there is successfully imported. 
+
+```{r}
+mae <- MAEio::read_personalis(sample_list)
+```
+
+Here's an overview of the {MultiAssayExperiment} object with all available
+modalities:
+```{r}
+mae
+```
+
+We can retrieve an individual modality by subsetting with double brackets: 
+
+```{r}
+mae[["gene_expression"]]
+```
+
+For more information about advanced subsetting, please refer to the
+[MultiAssayExperiment vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html#integrated-subsetting-across-experiments).
+
+## Summary statistics
+
+For some modalities, patient-level summary statistics are provided by Personalis in their HTML reports. 
+These are gathered automatically by the respective reader function, and stored in `colData`. 
+For instance, tumor mutational burden is available from the `dna_small_variants_somatic` modality: 
+
+```{r}
+colnames(colData(mae[["dna_small_variants_somatic"]]))
+```
+
+Let's take a closer look at the different mutation rates
+```{r}
+colData(mae[["dna_small_variants_somatic"]]) |>
+  as_tibble(rownames = "sample") |>
+  select(sample, starts_with("Somatic.variants.per.Mb")) |>
+  head() |>
+  knitr::kable()
+```
+
+## Working with BumpyMatrices
+
+Not all Personalis data is strictly rectangular like a gene expression matrix and 
+nicely fits into a SummarizedExperiment. For instance, TCR clones or small variant reports
+are a long-form data frame with many entries for each patient. 
+The {BumpyMatrix} package comes to the rescue. It allows to fit long-form data frames 
+into a {SummarizedExperiment} by building a matrix that is rectangular in the first 
+two dimensions, but is ragged (i.e. arbitrary length) in the third dimension. 
+
+In practice, bumpy matrices are a bit cumbersome to work with. They are to be seen
+as an intermediate container that allows to store particular kinds of data in 
+the MultiAssayExperiment object and (after subsetting to the patients of interest)
+can be converted back to a data frame using `BumpyMatrix::unsplitAsDataFrame`. 
+
+### Example: TCR data stored as BumpyMatrix
+
+The `tcr` assay of our `mae` object is such a BumpyMatrix. Here, the colnames 
+correspond to our patient identifiers, and the row names to the TCR chain (TRA = alpha, TRB = beta). 
+Each cell of the matrix is a data frame with all clones for the respective patient and chain.
+ 
+```{r}
+tcr <- assay(mae, "tcr")
+tcr
+```
+
+It is possible to retrieve this data frame for a single chain and patient: 
+```{r}
+tcr["TRA", "K13T"] |> as_tibble()
+```
+
+We can also slice the matrix for a single variable, e.g. we can use this to retrieve only
+the CDR3 amino acid sequence for all clones. This results in another bumpy matrix, except that
+now every cell of the matrix is a character vector instead of a data frame. 
+
+```{r}
+tcr[, , "CDR3 Amino Acid Sequence"]
+```
+
+Finally, and arguably most useful for us, it is also possible to convert the bumpy matrix back into
+a long-form data frame. Here, the column and rownames are added as additional columns to the 
+data frame: 
+
+```{r}
+BumpyMatrix::unsplitAsDataFrame(tcr) |> as_tibble()
+```
