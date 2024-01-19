@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(MAEio)
+library(PersonalisIO)
 
-test_check("MAEio")
+test_check("PersonalisIO")

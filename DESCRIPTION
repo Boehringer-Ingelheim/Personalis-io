@@ -1,4 +1,4 @@
-Package: MAEio
+Package: PersonalisIO 
 Title: Read Various Data Sources into MultiAssayExperiment objects 
 Version: 0.1.9000
 Authors@R: 

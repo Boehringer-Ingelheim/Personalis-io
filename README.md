@@ -1,4 +1,4 @@
-# Personalis-io
+# PersonalisIO
 
 **This package provides convenience functions for reading real-world evidence data provided by [Personalis](https://www.personalis.com/)
 into Bioconductor [MultiAssayExperiment](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html) objects**
