@@ -27,6 +27,10 @@ remotes::install_github("Boehringer-Ingelheim/Personalis-io")
 
 If there is enough interest, we will consider submitting the package to Bioconductor.
 
+## Contact
+
+Please use the [issue tracker](https://github.com/Boehringer-Ingelheim/Personalis-io/issues).
+
 ## Credits
 
 This package was developed by [Gregor Sturm](https://github.com/grst) with input from Neetika Nath and Germán Leparc.
