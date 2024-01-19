@@ -1,6 +1,7 @@
 ## custom
 /exploratory/
 /doc/
+/documents/
 
 ## editors
 .vscode
@@ -13,8 +14,3 @@
 .DS_Store
 inst/doc
 /Meta/
-<<<<<<< HEAD
-
-/exploratory/
-=======
->>>>>>> 9a40da3 (Add files from internal repo)
