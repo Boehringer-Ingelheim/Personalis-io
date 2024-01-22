@@ -1,0 +1,18 @@
+url: https://boehringer-ingelheim.github.io/Personalis-io
+template:
+  bootstrap: 5
+reference:
+  - title: Reading all modalities
+    desc: Read multiple samples and multiple modalities into a MultiAssayExperiment
+    contents:
+      - read_personalis
+  - title: Reading individual modalities
+    desc: Read multiple samples, but only individual modalities into a SummarizedExperiment
+    contents:
+      - read_personalis_cnv_reports
+      - read_personalis_gene_expression
+      - read_personalis_hla_reports
+      - read_personalis_msi_reports
+      - read_personalis_small_variant_reports
+      - read_personalis_tcr_reports
+
