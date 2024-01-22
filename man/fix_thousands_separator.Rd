@@ -7,7 +7,14 @@ and convert to numeric.}
 \usage{
 fix_thousands_separator(col)
 }
+\arguments{
+\item{col}{a character vector}
+}
+\value{
+numeric vector
+}
 \description{
 Remove thousands separator (',') in numbers
 and convert to numeric.
 }
+\keyword{internal}

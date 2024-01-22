@@ -12,3 +12,4 @@ read_personalis_gene_expression_sample(sample_folder)
 \description{
 Read a single gene expression sample from a personalis folder
 }
+\keyword{internal}

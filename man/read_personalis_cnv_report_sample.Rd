@@ -12,3 +12,4 @@ data frame with all CNV
 \description{
 Read personalis CNV data for a single sample
 }
+\keyword{internal}

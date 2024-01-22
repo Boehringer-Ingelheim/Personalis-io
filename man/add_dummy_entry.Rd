@@ -34,3 +34,4 @@ rows that are all NAs for the missing samples. When converting the bumpy matrix
 back to a data frame, the dummy entries are lost, so we end up with the original
 data frame, which is nice!.
 }
+\keyword{internal}

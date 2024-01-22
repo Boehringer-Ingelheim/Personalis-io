@@ -12,3 +12,4 @@ data frame
 \description{
 Extract summary statistics from the TCR HTML report
 }
+\keyword{internal}

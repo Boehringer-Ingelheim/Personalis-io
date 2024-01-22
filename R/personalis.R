@@ -65,6 +65,7 @@ read_personalis_gene_expression <- function(sample_paths) {
 #' @param sample_folder path to personalis folder
 #' @importFrom SummarizedExperiment SummarizedExperiment
 #' @importFrom readxl read_excel
+#' @keywords internal
 read_personalis_gene_expression_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   gex_path <- file.path(sample_folder, "RNA_Pipeline", "Gene_Expression_Reports", sprintf("RNA_%s_tumor_rna_expression_report.xlsx", sample_name))
@@ -184,6 +185,7 @@ read_personalis_small_variant_reports <- function(sample_paths, modality, sample
 #' @param modality modality from which the variants were called. Can be either 'DNA' or 'RNA'
 #' @return data frame with all variants
 #' @importFrom dplyr mutate
+#' @keywords internal
 read_personalis_small_variant_report_sample <- function(sample_folder, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
   stopifnot("`sample_types` must be in 'tumor', 'normal', or 'somatic'." = sample_type %in% c("tumor", "normal", "somatic"))
@@ -209,6 +211,7 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
 
 #'
 #' @importFrom tidyr pivot_longer
+#' @keywords internal
 read_personalis_somatic_variants_summary_statistics <- function(sample_folder, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
   sample_name <- basename(sample_folder)
@@ -296,6 +299,7 @@ read_personalis_cnv_reports <- function(sample_paths) {
 
 #' Read personalis CNV data for a single sample
 #' @return data frame with all CNV
+#' @keywords internal
 read_personalis_cnv_report_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   cnv_file <- file.path(
@@ -345,6 +349,7 @@ read_personalis_cnv_report_sample <- function(sample_folder) {
 }
 
 #' @importFrom rvest read_html html_elements html_nodes html_text
+#' @keywords internal
 read_personalis_cnv_summary_statistics <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   html_file <- file.path(
@@ -383,6 +388,7 @@ read_personalis_hla_reports <- function(sample_paths) {
 
 #' Read HLA types for a single sample
 #' @return data frame with one row per HLA gene per Allele.
+#' @keywords internal
 read_personalis_hla_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   # The HLAs are inferred on the "normal" sample, therefore the final T needs to be replaced with N
@@ -454,6 +460,7 @@ read_personalis_tcr_reports <- function(sample_paths) {
 
 #' Read TCRs for a single sample.
 #' @return data frame with one row per TCR clone
+#' @keywords internal
 read_personalis_tcr_clone_report_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   tcr_df <- lapply(c("TRA", "TRB"), function(locus) {
@@ -483,6 +490,7 @@ read_personalis_tcr_clone_report_sample <- function(sample_folder) {
 #' Extract summary statistics from the TCR HTML report
 #' @return data frame
 #' @importFrom rvest read_html html_elements html_table
+#' @keywords internal
 read_personalis_tcr_summary_statistics <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   html_file <- file.path(
@@ -522,6 +530,7 @@ read_personalis_msi_reports <- function(sample_paths) {
 
 #' Extract MSI locus information and summary statistics from a single MSI HTML report
 #' @return SummarizedExperiment
+#' @keywords internal
 read_personalis_msi_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   html_file <- file.path(

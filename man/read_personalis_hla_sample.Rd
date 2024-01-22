@@ -12,3 +12,4 @@ data frame with one row per HLA gene per Allele.
 \description{
 Read HLA types for a single sample
 }
+\keyword{internal}

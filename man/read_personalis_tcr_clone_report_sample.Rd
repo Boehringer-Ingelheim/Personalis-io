@@ -12,3 +12,4 @@ data frame with one row per TCR clone
 \description{
 Read TCRs for a single sample.
 }
+\keyword{internal}

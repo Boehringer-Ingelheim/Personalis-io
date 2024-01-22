@@ -20,3 +20,4 @@ for missing samples.}
 \description{
 Ignores samples that cannot be found and prints a warning message for missing samples.
 }
+\keyword{internal}

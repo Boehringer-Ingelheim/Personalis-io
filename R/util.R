@@ -1,5 +1,8 @@
 #' Remove thousands separator (',') in numbers
 #' and convert to numeric.
+#' @param col a character vector
+#' @return numeric vector
+#' @keywords internal
 fix_thousands_separator <- function(col) {
   as.numeric(sub(",", "", col))
 }
@@ -14,6 +17,7 @@ fix_thousands_separator <- function(col) {
 #' @param callback IO function to use
 #' @param ... additional aruments passed to callback
 #' @return Returns the value of `callback(path, ...)` or NULL if a file not found error occured.
+#' @keywords internal
 catch_file_not_found <- function(path, callback, ...) {
   tryCatch(
     {
@@ -39,6 +43,7 @@ catch_file_not_found <- function(path, callback, ...) {
 #' @param sample_path List of filenames from which the samples were read in (same order as sample_list)
 #' @param mod_name Name of the data modality to be used for the error message. e.g. "gene expression"
 #' @return a boolean vector indicating which elements in `sample_list` are NULL
+#' @keywords internal
 warn_missing_samples <- function(sample_list, sample_paths, mod_name) {
   failed_sample_mask <- vapply(sample_list, is.null, logical(1))
   lapply(sample_paths[failed_sample_mask], function(path) {
@@ -60,6 +65,7 @@ warn_missing_samples <- function(sample_list, sample_paths, mod_name) {
 #'   for missing samples.
 #'
 #' @return {list} List with one element per successfully read sample. Each element is a return value of `io_func`.
+#' @keywords internal
 read_samples <- function(sample_paths, io_func, description, ...) {
   sample_list <- pbapply::pblapply(
     sample_paths,
@@ -92,6 +98,7 @@ read_samples <- function(sample_paths, io_func, description, ...) {
 #' @param col_data {data.frame} data frame that is used as colData (must have rownames that are sample identifiers!)
 #' @param sample_col {character} column in `df` that contains the sample identifier
 #' @return {tibble} new data frame with dummy entries added
+#' @keywords internal
 add_dummy_entry <- function(df, col_data, sample_col = "sample") {
   missing_samples <- setdiff(rownames(col_data), unique(df[[sample_col]]))
   dummy_entries <- lapply(

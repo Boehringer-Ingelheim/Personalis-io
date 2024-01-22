@@ -12,3 +12,4 @@ SummarizedExperiment
 \description{
 Extract MSI locus information and summary statistics from a single MSI HTML report
 }
+\keyword{internal}

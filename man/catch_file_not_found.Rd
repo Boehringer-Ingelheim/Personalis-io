@@ -23,3 +23,4 @@ If an error occurs:
 \item stop otherwise
 }
 }
+\keyword{internal}
