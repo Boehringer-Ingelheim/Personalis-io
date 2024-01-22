@@ -1,5 +1,5 @@
-Package: PersonalisIO 
-Title: Read Various Data Sources into MultiAssayExperiment objects 
+Package: PersonalisIO
+Title: Read Personalis data into MultiAssayExperiment objects
 Version: 0.1.9000
 Authors@R: 
     person("Gregor", "Sturm", , "gregor.sturm@boehringer-ingelheim.com", role = c("aut", "cre"))
@@ -26,4 +26,5 @@ Suggests:
 Config/testthat/edition: 3
 biocViews:
 VignetteBuilder: knitr
+URL: https://Boehringer-Ingelheim.github.io/Personalis-io
 License: GPL-3 + file LICENSE
