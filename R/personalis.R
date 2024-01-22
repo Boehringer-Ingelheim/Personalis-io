@@ -4,6 +4,7 @@ GUESS_MAX <- 21474836 # largest value without warning - this is anyway more than
 
 #' Read a set of personalis results folders into a MultiAssayExperiment object
 #' @param pathlist List with paths to Personalis results folders
+#' @importFrom MultiAssayExperiment MultiAssayExperiment
 #' @return MultiAssayExperiment
 #' @export
 read_personalis <- function(pathlist) {
@@ -118,7 +119,7 @@ read_personalis_gene_expression_sample <- function(sample_folder) {
 #'   'somatic' refers to tumor vs. normal (i.e. somatic mutations only).
 #' @param modality modality from which the variants were called. Can be either 'DNA' or 'RNA'
 #' @return SummarizedExperiment
-#' @importFrom dplyr select
+#' @importFrom dplyr select distinct bind_rows
 #' @importFrom purrr map
 #' @export
 read_personalis_small_variant_reports <- function(sample_paths, modality, sample_type) {
@@ -231,6 +232,7 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
 
 #'
 #' @importFrom tidyr pivot_longer
+#' @importFrom dplyr bind_rows
 #' @keywords internal
 read_personalis_somatic_variants_summary_statistics <- function(sample_folder, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
@@ -274,6 +276,7 @@ read_personalis_somatic_variants_summary_statistics <- function(sample_folder, m
 #' @return SummarizedExperiment
 #' @param sample_paths List of directories with Personalis samples
 #' @importFrom purrr map
+#' @importFrom dplyr bind_rows
 #' @export
 read_personalis_cnv_reports <- function(sample_paths) {
   read_all <- function(path) {
@@ -320,6 +323,8 @@ read_personalis_cnv_reports <- function(sample_paths) {
 
 #' Read personalis CNV data for a single sample
 #' @return data frame with all CNV
+#' @importFrom dplyr any_of across cur_column bind_rows
+#' @importFrom purrr keep
 #' @keywords internal
 read_personalis_cnv_report_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
@@ -370,6 +375,8 @@ read_personalis_cnv_report_sample <- function(sample_folder) {
 }
 
 #' @importFrom rvest read_html html_elements html_nodes html_text
+#' @importFrom tidyr pivot_wider
+#' @importFrom tibble tibble
 #' @keywords internal
 read_personalis_cnv_summary_statistics <- function(sample_folder) {
   sample_name <- basename(sample_folder)
@@ -380,11 +387,11 @@ read_personalis_cnv_summary_statistics <- function(sample_folder) {
   )
   # unfortunately, this is not a table, but a div of divs that looks like a table
   table <- (read_html(html_file) |> html_elements("#copy_number"))[[1]]
-  titles <- table %>%
-    html_nodes(".title") %>%
+  titles <- table |>
+    html_nodes(".title") |>
     html_text()
-  values <- table %>%
-    html_nodes(".value") %>%
+  values <- table |>
+    html_nodes(".value") |>
     html_text()
 
   cnv_metrics <- tibble(metric = titles[1:5], value = values[1:5]) |>
@@ -421,7 +428,7 @@ read_personalis_hla_sample <- function(sample_folder) {
   )
   hla_tab <- read_excel(hla_file)
   # Put the data in one column (treating Allele 1 and 2 as separate variables)
-  hla_tab <- bind_rows(
+  hla_tab <- dplyr::bind_rows(
     hla_tab |> select(hla_gene = Gene, hla_type = Allele1) |> mutate(locus = sprintf("%s.1", hla_gene), allele = 1),
     hla_tab |> select(hla_gene = Gene, hla_type = Allele2) |> mutate(locus = sprintf("%s.2", hla_gene), allele = 2)
   )
@@ -456,7 +463,7 @@ read_personalis_tcr_reports <- function(sample_paths) {
   }
   tcr_list <- read_samples(sample_paths, read_all, "TCR")
 
-  col_data <- bind_rows(map(tcr_list, "summary_stats"))
+  col_data <- dplyr::bind_rows(map(tcr_list, "summary_stats"))
 
   if (nrow(col_data) == 0) {
     return(NULL)
@@ -464,7 +471,7 @@ read_personalis_tcr_reports <- function(sample_paths) {
 
   col_data <- col_data |> tibble::column_to_rownames("sample")
 
-  all_tcr <- bind_rows(map(tcr_list, "clone_report"))
+  all_tcr <- dplyr::bind_rows(map(tcr_list, "clone_report"))
   tcr_bm <- splitAsBumpyMatrix(
     all_tcr,
     row = all_tcr$locus,
@@ -481,6 +488,7 @@ read_personalis_tcr_reports <- function(sample_paths) {
 
 #' Read TCRs for a single sample.
 #' @return data frame with one row per TCR clone
+#' @importFrom dplyr if_else bind_rows
 #' @keywords internal
 read_personalis_tcr_clone_report_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)

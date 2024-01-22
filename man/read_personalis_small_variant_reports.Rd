@@ -12,7 +12,7 @@ read_personalis_small_variant_reports(sample_paths, modality, sample_type)
 
 \item{modality}{modality from which the variants were called. Can be either 'DNA' or 'RNA'}
 
-\item{sample_types}{Can be ome or multiple of of 'tumor', 'normal', or 'somatic'.
+\item{sample_type}{Can be one or multiple of of 'tumor', 'normal', or 'somatic'.
 'tumor' refers to tumor sample vs. genome reference (i.e. somatic+germline mutations),
 'normal' refers to normal sample vs. genome reference (i.e. germline mutations) and
 'somatic' refers to tumor vs. normal (i.e. somatic mutations only).}
