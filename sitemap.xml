@@ -1,81 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/404.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/CONTRIBUTING.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/articles/personalis.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/articles/PersonalisIO.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/articles/index.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/authors.html</loc>
   </url>
   <url>
-    <loc>/reference/add_dummy_entry.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/index.html</loc>
   </url>
   <url>
-    <loc>/reference/catch_file_not_found.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/add_dummy_entry.html</loc>
   </url>
   <url>
-    <loc>/reference/fix_thousands_separator.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/catch_file_not_found.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/fix_thousands_separator.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_cnv_report_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_cnv_reports.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_cnv_report_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_gene_expression.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_cnv_reports.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_gene_expression_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_gene_expression.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_hla_reports.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_gene_expression_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_hla_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_hla_reports.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_msi_reports.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_hla_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_msi_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_msi_reports.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_small_variant_report_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_msi_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_small_variant_reports.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_small_variant_report_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_tcr_clone_report_sample.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_small_variant_reports.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_tcr_reports.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_tcr_clone_report_sample.html</loc>
   </url>
   <url>
-    <loc>/reference/read_personalis_tcr_summary_statistics.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_tcr_reports.html</loc>
   </url>
   <url>
-    <loc>/reference/read_samples.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_personalis_tcr_summary_statistics.html</loc>
   </url>
   <url>
-    <loc>/reference/warn_missing_samples.html</loc>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/read_samples.html</loc>
+  </url>
+  <url>
+    <loc>https://boehringer-ingelheim.github.io/Personalis-io/reference/warn_missing_samples.html</loc>
   </url>
 </urlset>
