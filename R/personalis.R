@@ -52,7 +52,7 @@ read_personalis <- function(pathlist) {
 #
 
 #' Read in gene expression data from personalis folders
-#' @param sample_list A vector of paths to personalis folders
+#' @param sample_paths A vector of paths to personalis folders
 #' @return SummarizedExperiment
 #' @export
 read_personalis_gene_expression <- function(sample_paths) {
@@ -95,8 +95,28 @@ read_personalis_gene_expression_sample <- function(sample_folder) {
 # -------------------- SMALL VARIANTS --------------------
 #
 
-#' Read in small variant data from personalis folders
+#' Read in small variant data from personalis folder
+#' We only read in the "Preferred Transcript" report here:
+#'
+#' Preferred Transcript: The RefSeq accession.version for the transcript used for variant analysis.
+#' Personalis uses a curated list of transcripts, which is based on the number of
+#' times a transcript (accession.version) is referred to in COSMIC. If not present in
+#' COSMIC, the default transcript would be the one corresponding to the longest CDS.
+#' (source: Personalis Analysis_Pipeline_Documentation)
+#'
+#' We also do not read the `cancer_clinical_research`, the `cancer_research` and the `lowpupulationfreq` reports,
+#' because they are subsets of the full report.
+#'
+#' In addition, Personalis also provides raw VCF files with all (unfiltered) variants. We currently don't
+#' read them in because without additional filtering they are not very useful. If you need this level of information,
+#' feel free to start from the raw vcf files or even run your own variant calling based on the FASTQ files.
+#'
 #' @param sample_paths A vector of paths to personalis folders
+#' @param sample_type Can be one or multiple of of 'tumor', 'normal', or 'somatic'.
+#'   'tumor' refers to tumor sample vs. genome reference (i.e. somatic+germline mutations),
+#'   'normal' refers to normal sample vs. genome reference (i.e. germline mutations) and
+#'   'somatic' refers to tumor vs. normal (i.e. somatic mutations only).
+#' @param modality modality from which the variants were called. Can be either 'DNA' or 'RNA'
 #' @return SummarizedExperiment
 #' @importFrom dplyr select
 #' @importFrom purrr map
@@ -252,6 +272,7 @@ read_personalis_somatic_variants_summary_statistics <- function(sample_folder, m
 
 #' Read Personalis CNV data for a list of samples
 #' @return SummarizedExperiment
+#' @param sample_paths List of directories with Personalis samples
 #' @importFrom purrr map
 #' @export
 read_personalis_cnv_reports <- function(sample_paths) {

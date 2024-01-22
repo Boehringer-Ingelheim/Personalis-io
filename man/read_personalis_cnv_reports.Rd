@@ -6,6 +6,9 @@
 \usage{
 read_personalis_cnv_reports(sample_paths)
 }
+\arguments{
+\item{sample_paths}{List of directories with Personalis samples}
+}
 \value{
 SummarizedExperiment
 }

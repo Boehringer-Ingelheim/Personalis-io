@@ -7,7 +7,7 @@
 read_personalis_gene_expression(sample_paths)
 }
 \arguments{
-\item{sample_list}{A vector of paths to personalis folders}
+\item{sample_paths}{A vector of paths to personalis folders}
 }
 \value{
 SummarizedExperiment
