@@ -33,7 +33,7 @@ mae
 
 For more details, see the [Documentation](https://boehringer-ingelheim.github.io/Personalis-io/):
 
--   [Vignette](https://boehringer-ingelheim.github.io/Personalis-io/articles/personalis.html)
+-   [Vignette](https://boehringer-ingelheim.github.io/Personalis-io/articles/PersonalisIO.html)
 -   [function reference](https://boehringer-ingelheim.github.io/Personalis-io/reference/index.html)
 
 ## Installation
@@ -53,4 +53,4 @@ Please use the [issue tracker](https://github.com/Boehringer-Ingelheim/Personali
 
 ## Credits
 
-This package was developed by [Gregor Sturm](https://github.com/grst) with input from Neetika Nath and Germán Leparc.
+This package was developed by [Gregor Sturm](https://github.com/grst) with contributions from [Christopher Mohr](https://github.com/christopher-mohr), Neetika Nath and Germán Leparc.
