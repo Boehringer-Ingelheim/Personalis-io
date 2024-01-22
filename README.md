@@ -9,12 +9,32 @@ into Bioconductor [MultiAssayExperiment](https://bioconductor.org/packages/relea
 
 ## Basic Usage
 
-TODO
+```r
+# List of folders with Personalis data (each folder represents one sample)
+sample_list = c("/tmp/personalis_example_data/sample1", "/tmp/personalis_example_data/sample2")
 
-For more details, see the Documentation:
+# Load the data
+mae <- PersonalisIO::read_personalis(sample_list)
 
--   Vignette
--   function reference
+# mae is a MultiAssayExperiment with the following structure
+mae
+#> A MultiAssayExperiment object of 8 listed
+#>  experiments with user-defined names and respective classes.
+#>  Containing an ExperimentList class object of length 8:
+#>  [1] gene_expression: SummarizedExperiment with 22956 rows and 5 columns
+#>  [2] dna_small_variants_somatic: SummarizedExperiment with 6097 rows and 5 columns
+#>  [3] dna_small_variants_tumor: SummarizedExperiment with 376654 rows and 5 columns
+#>  [4] rna_small_variants_somatic: SummarizedExperiment with 5302 rows and 5 columns
+#>  [5] rna_small_variants_tumor: SummarizedExperiment with 201347 rows and 5 columns
+#>  [6] msi: SummarizedExperiment with 5 rows and 5 columns
+#>  [7] cnv: SummarizedExperiment with 145 rows and 5 columns
+#>  [8] tcr: SummarizedExperiment with 2 rows and 5 columns
+```
+
+For more details, see the [Documentation](https://boehringer-ingelheim.github.io/Personalis-io/):
+
+-   [Vignette](https://boehringer-ingelheim.github.io/Personalis-io/articles/personalis.html)
+-   [function reference](https://boehringer-ingelheim.github.io/Personalis-io/reference/index.html)
 
 ## Installation
 
