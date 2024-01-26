@@ -257,7 +257,7 @@ read_personalis_somatic_variants_summary_statistics <- function(sample_folder, m
     html_table(na.strings = "N/A")
   tables |>
     # some reports contain two such tables, some only one
-    keep(\(x) colnames(x)[1] == "Summary Small Variants") |>
+    keep(\(x) "SNVs" %in% colnames(x)) |>
     lapply(function(df) {
       colnames(df) <- make.names(colnames(df))
       colnames(df)[1] <- "metric"
@@ -296,8 +296,10 @@ read_personalis_cnv_reports <- function(sample_paths) {
     return(NULL)
   }
 
-  col_data <- bind_rows(map(cnv_list, "summary_stats")) |>
-    tibble::column_to_rownames("sample")
+  col_data <- bind_rows(map(cnv_list, "summary_stats"))
+  if (nrow(col_data)) {
+    col_data <- col_data |> tibble::column_to_rownames("sample")
+  }
 
   all_cnv <- bind_rows(map(cnv_list, "cnv_report"))
   row_data <- all_cnv |>
@@ -395,18 +397,24 @@ read_personalis_cnv_summary_statistics <- function(sample_folder) {
     sprintf("DNA_%s_dna_statistics.html", sample_name)
   )
   # unfortunately, this is not a table, but a div of divs that looks like a table
-  table <- (read_html(html_file) |> html_elements("#copy_number"))[[1]]
-  titles <- table |>
-    html_nodes(".title") |>
-    html_text()
-  values <- table |>
-    html_nodes(".value") |>
-    html_text()
+  table <- (read_html(html_file) |> html_elements("#copy_number"))
+  # unfortunately, it seems missing in newer versions of the report
+  if (!length(table)) {
+    return(tibble())
+  } else {
+    table <- table[[1]]
+    titles <- table |>
+      html_nodes(".title") |>
+      html_text()
+    values <- table |>
+      html_nodes(".value") |>
+      html_text()
 
-  cnv_metrics <- tibble(metric = titles[1:5], value = values[1:5]) |>
-    mutate(sample = sample_name) |>
-    pivot_wider(id_cols = sample, names_from = metric, values_from = value)
-  cnv_metrics
+    cnv_metrics <- tibble(metric = titles[1:5], value = values[1:5]) |>
+      mutate(sample = sample_name) |>
+      pivot_wider(id_cols = sample, names_from = metric, values_from = value)
+    cnv_metrics
+  }
 }
 
 
