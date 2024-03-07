@@ -5,7 +5,12 @@
 \title{Read in small variant data from personalis folder
 We only read in the "Preferred Transcript" report here:}
 \usage{
-read_personalis_small_variant_reports(sample_paths, modality, sample_type)
+read_personalis_small_variant_reports(
+  sample_paths,
+  modality,
+  sample_type,
+  report_type
+)
 }
 \arguments{
 \item{sample_paths}{A vector of paths to personalis folders}
@@ -16,6 +21,8 @@ read_personalis_small_variant_reports(sample_paths, modality, sample_type)
 'tumor' refers to tumor sample vs. genome reference (i.e. somatic+germline mutations),
 'normal' refers to normal sample vs. genome reference (i.e. germline mutations) and
 'somatic' refers to tumor vs. normal (i.e. somatic mutations only).}
+
+\item{report_type}{report_type which should be read. Can be either 'preferred' or 'all'}
 }
 \value{
 SummarizedExperiment

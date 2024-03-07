@@ -7,7 +7,8 @@
 read_personalis_small_variant_report_sample(
   sample_folder,
   modality,
-  sample_type
+  sample_type,
+  report_type
 )
 }
 \arguments{
@@ -15,7 +16,9 @@ read_personalis_small_variant_report_sample(
 
 \item{modality}{modality from which the variants were called. Can be either 'DNA' or 'RNA'}
 
-\item{sample_types}{Can be ome or multiple of of 'tumor', 'normal', or 'somatic'.
+\item{report_type}{report_type which should be read. Can be either 'preferred' or 'all'}
+
+\item{sample_types}{Can be one or multiple of of 'tumor', 'normal', or 'somatic'.
 'tumor' refers to tumor sample vs. genome reference (i.e. somatic+germline mutations),
 'normal' refers to normal sample vs. genome reference (i.e. germline mutations) and
 'somatic' refers to tumor vs. normal (i.e. somatic mutations only).}
@@ -36,8 +39,7 @@ COSMIC, the default transcript would be the one corresponding to the longest CDS
 We also do not read the \code{cancer_clinical_research}, the \code{cancer_research} and the \code{lowpupulationfreq} reports,
 because they are subsets of the full report.
 
-In addition, Personalis also provides raw VCF files with all (unfiltered) variants. We currently don't
-read them in because without additional filtering they are not very useful. If you need this level of information,
-feel free to start from the raw vcf files or even run your own variant calling based on the FASTQ files.
+In addition, Personalis also provides raw VCF files with all (unfiltered) variants. If you need this level of information,
+please specify read_vcf_data=TRUE in your read_personalis() call.
 }
 \keyword{internal}
