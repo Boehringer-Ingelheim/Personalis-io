@@ -1,0 +1,17 @@
+## custom
+/exploratory/
+/documents/
+/docs/
+
+## editors
+.vscode
+
+## R
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+inst/doc
+/Meta/
+/doc/

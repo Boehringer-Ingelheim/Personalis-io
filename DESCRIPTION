@@ -1,0 +1,30 @@
+Package: PersonalisIO
+Title: Read Personalis data into MultiAssayExperiment objects
+Version: 0.2.0.9000
+Authors@R: 
+    person("Gregor", "Sturm", , "gregor.sturm@boehringer-ingelheim.com", role = c("aut", "cre"))
+Description: This package provides convenience functions for reading real-world evidence data provided by Personalis into Bioconductor MultiAssayExperiment objects.
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.0
+Depends:
+    SummarizedExperiment,
+    readxl,
+    MultiAssayExperiment,
+    tibble,
+    pbapply,
+    tidyr,
+    purrr,
+    dplyr,
+    BumpyMatrix,
+    rvest
+Suggests: 
+    knitr,
+    rmarkdown,
+    conflicted,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+biocViews:
+VignetteBuilder: knitr
+URL: https://Boehringer-Ingelheim.github.io/Personalis-io
+License: GPL-3 + file LICENSE
