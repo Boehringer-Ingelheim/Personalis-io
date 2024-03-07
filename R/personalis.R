@@ -149,7 +149,7 @@ read_personalis_small_variant_reports <- function(sample_paths, modality, sample
   row_data <- all_variants |>
     select(
       mut_id,
-      Sequence,
+      Chromosome,
       POS,
       `Variant Type`,
       `Genomic Variant`
@@ -225,7 +225,9 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
     guess_max = GUESS_MAX
   ) |>
     mutate(sample = sample_name) |>
-    mutate(mut_id = sprintf("%s_%s_%s", Sequence, `Genomic Variant`, `Variant Type`))
+    # in older versions, the "Chromosome" column is called "Sequence"
+    rename_with(\(x) if_else(x == "Sequence", "Chromosome", x)) |>
+    mutate(mut_id = sprintf("%s_%s_%s", Chromosome, `Genomic Variant`, `Variant Type`))
 
   variant_table
 }
@@ -233,6 +235,7 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
 #'
 #' @importFrom tidyr pivot_longer
 #' @importFrom dplyr bind_rows
+#' @importFrom purrr keep
 #' @keywords internal
 read_personalis_somatic_variants_summary_statistics <- function(sample_folder, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
@@ -252,7 +255,9 @@ read_personalis_somatic_variants_summary_statistics <- function(sample_folder, m
     html_elements("#somatic_variant_annotation") |>
     html_elements("table") |>
     html_table(na.strings = "N/A")
-  tables[2:3] |>
+  tables |>
+    # some reports contain two such tables, some only one
+    keep(\(x) "SNVs" %in% colnames(x)) |>
     lapply(function(df) {
       colnames(df) <- make.names(colnames(df))
       colnames(df)[1] <- "metric"
@@ -291,12 +296,14 @@ read_personalis_cnv_reports <- function(sample_paths) {
     return(NULL)
   }
 
-  col_data <- bind_rows(map(cnv_list, "summary_stats")) |>
-    tibble::column_to_rownames("sample")
+  col_data <- bind_rows(map(cnv_list, "summary_stats"))
+  if (nrow(col_data)) {
+    col_data <- col_data |> tibble::column_to_rownames("sample")
+  }
 
   all_cnv <- bind_rows(map(cnv_list, "cnv_report"))
   row_data <- all_cnv |>
-    select(cnv_id, `Gene Symbol`, `Sequence`, `Segment Start`, `Segment End`) |>
+    select(cnv_id, `Gene Symbol`, `Chromosome`, `Segment Start`, `Segment End`) |>
     distinct()
   stopifnot("cnv_id is not a unique identifier" = !any(duplicated(row_data$cnv_id)))
 
@@ -339,11 +346,11 @@ read_personalis_cnv_report_sample <- function(sample_folder) {
     "Gene Symbol" = as.character,
     "CNA Type" = as.character,
     "AbsoluteCN" = as.numeric,
-    "Sequence" = as.character,
+    "Chromosome" = as.character,
     "Segment Start" = as.numeric,
     "Segment End" = as.numeric,
-    "Estimated Sample purity" = as.numeric,
-    "Estimated Sample Ploidy" = as.numeric,
+    # "Estimated Sample purity" = as.numeric,
+    # "Estimated Sample Ploidy" = as.numeric,
     "Percent of Gene in Event" = \(x) as.numeric(sub("%", "", x))
   )
   suppressWarnings({
@@ -353,9 +360,13 @@ read_personalis_cnv_report_sample <- function(sample_folder) {
       # we also can't specify the columns at import time, because in some personalis versions, some columns
       # are omitted.
       amp = read_excel(cnv_file, sheet = "AMP", col_types = NULL) |>
+        # In older reports the "Chromosome" column is called sequence
+        rename_with(\(x) if_else(x == "Sequence", "Chromosome", x)) |>
         select(-any_of(c("log posterior probability", "B-allele Frequency", "Allelotype", "Mean_log2Ratio"))) |>
         mutate(across(names(COL_TYPES), \(x) COL_TYPES[[cur_column()]](x))),
       del = read_excel(cnv_file, sheet = "DEL", col_types = NULL) |>
+        # In older reports the "Chromosome" column is called sequence
+        rename_with(\(x) if_else(x == "Sequence", "Chromosome", x)) |>
         select(-any_of(c("Wilcoxon pvalue", "KS pvalue"))) |>
         mutate(across(names(COL_TYPES), \(x) COL_TYPES[[cur_column()]](x)))
     )
@@ -368,7 +379,7 @@ read_personalis_cnv_report_sample <- function(sample_folder) {
     cnv_table <- cnv_table |>
       mutate(sample = sample_name) |>
       # if a segment spans multiple genes, there will be multiple rows per gene
-      mutate(cnv_id = sprintf("%s_%i_%i_%s", Sequence, `Segment Start`, `Segment End`, `Gene Symbol`))
+      mutate(cnv_id = sprintf("%s_%i_%i_%s", Chromosome, `Segment Start`, `Segment End`, `Gene Symbol`))
   }
 
   cnv_table
@@ -386,18 +397,24 @@ read_personalis_cnv_summary_statistics <- function(sample_folder) {
     sprintf("DNA_%s_dna_statistics.html", sample_name)
   )
   # unfortunately, this is not a table, but a div of divs that looks like a table
-  table <- (read_html(html_file) |> html_elements("#copy_number"))[[1]]
-  titles <- table |>
-    html_nodes(".title") |>
-    html_text()
-  values <- table |>
-    html_nodes(".value") |>
-    html_text()
+  table <- (read_html(html_file) |> html_elements("#copy_number"))
+  # unfortunately, it seems missing in newer versions of the report
+  if (!length(table)) {
+    return(tibble())
+  } else {
+    table <- table[[1]]
+    titles <- table |>
+      html_nodes(".title") |>
+      html_text()
+    values <- table |>
+      html_nodes(".value") |>
+      html_text()
 
-  cnv_metrics <- tibble(metric = titles[1:5], value = values[1:5]) |>
-    mutate(sample = sample_name) |>
-    pivot_wider(id_cols = sample, names_from = metric, values_from = value)
-  cnv_metrics
+    cnv_metrics <- tibble(metric = titles[1:5], value = values[1:5]) |>
+      mutate(sample = sample_name) |>
+      pivot_wider(id_cols = sample, names_from = metric, values_from = value)
+    cnv_metrics
+  }
 }
 
 
