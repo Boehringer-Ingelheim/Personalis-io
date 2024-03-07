@@ -483,12 +483,6 @@ read_personalis_cnv_reports <- function(sample_paths) {
   all_cnv <- bind_rows(map(cnv_list, "cnv_report"))
   row_data <- all_cnv |>
     select(cnv_id, `Gene Symbol`, `Chromosome`, `Segment Start`, `Segment End`) |>
-  col_data <- bind_rows(map(cnv_list, "summary_stats")) |>
-    tibble::column_to_rownames("sample")
-
-  all_cnv <- bind_rows(map(cnv_list, "cnv_report"))
-  row_data <- all_cnv |>
-    select(cnv_id, `Gene Symbol`, `Sequence`, `Segment Start`, `Segment End`) |>
     distinct()
   stopifnot("cnv_id is not a unique identifier" = !any(duplicated(row_data$cnv_id)))
 
