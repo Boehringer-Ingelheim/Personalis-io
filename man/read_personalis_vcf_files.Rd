@@ -7,7 +7,14 @@
 read_personalis_vcf_files(sample_paths, modality, sample_type)
 }
 \arguments{
-\item{sample_list}{A vector of paths to personalis folders}
+\item{sample_paths}{A vector of paths to personalis folders}
+
+\item{modality}{modality from which the variants were called. Can be either 'DNA' or 'RNA'}
+
+\item{sample_type}{Can be one or multiple of of 'tumor', 'normal', or 'somatic'.
+'tumor' refers to tumor sample vs. genome reference (i.e. somatic+germline mutations),
+'normal' refers to normal sample vs. genome reference (i.e. germline mutations) and
+'somatic' refers to tumor vs. normal (i.e. somatic mutations only).}
 }
 \value{
 SummarizedExperiment
