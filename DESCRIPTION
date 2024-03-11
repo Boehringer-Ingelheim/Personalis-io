@@ -17,7 +17,9 @@ Depends:
     purrr,
     dplyr,
     BumpyMatrix,
-    rvest
+    rvest,
+    stringr, 
+    vcfR
 Suggests: 
     knitr,
     rmarkdown,
