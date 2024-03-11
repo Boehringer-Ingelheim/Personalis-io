@@ -9,9 +9,9 @@ GUESS_MAX <- 21474836 # largest value without warning - this is anyway more than
 #' @param read_vcf_data Boolean to specify if VCF file should be read in as well (default: FALSE)
 #' @return MultiAssayExperiment
 #' @export
-read_personalis <- function(pathlist, report_type="preferred", read_vcf_data=FALSE) {
+read_personalis <- function(pathlist, report_type = "preferred", read_vcf_data = FALSE) {
   stopifnot("`report_type` must be one of 'preferred' or 'all'." = report_type %in% c("preferred", "all"))
-  
+
   experiments <- list()
   message(">>> Reading gene expression...")
   experiments[["gene_expression"]] <- read_personalis_gene_expression(pathlist)
@@ -32,7 +32,7 @@ read_personalis <- function(pathlist, report_type="preferred", read_vcf_data=FAL
     message("Reading DNA small variant data (normal) from VCF files... ")
     experiments[["dna_small_variants_normal_vcf"]] <- read_personalis_vcf_files(pathlist, "DNA", "normal")
   }
-  
+
   message(">>> Reading RNA small variant data... ")
   message("Reading RNA small variant data (somatic)... ")
   experiments[["rna_small_variants_somatic"]] <- read_personalis_small_variant_reports(pathlist, "RNA", "somatic", report_type)
@@ -40,7 +40,7 @@ read_personalis <- function(pathlist, report_type="preferred", read_vcf_data=FAL
   experiments[["rna_small_variants_tumor"]] <- read_personalis_small_variant_reports(pathlist, "RNA", "tumor", report_type)
   message("Reading RNA small variant data (normal)... ")
   experiments[["rna_small_variants_normal"]] <- read_personalis_small_variant_reports(pathlist, "RNA", "normal", report_type)
-  
+
   # for RNA we only have tumor or somatic variant VCF data
   if (read_vcf_data) {
     message("Reading RNA small variant data (somatic) from VCF files... ")
@@ -142,6 +142,7 @@ read_personalis_gene_expression_sample <- function(sample_folder) {
 #' @param report_type report_type which should be read. Can be either 'preferred' or 'all'
 #' @return SummarizedExperiment
 #' @importFrom dplyr select distinct bind_rows
+#' @importFrom BumpyMatrix splitAsBumpyMatrix
 #' @importFrom purrr map
 #' @export
 read_personalis_small_variant_reports <- function(sample_paths, modality, sample_type, report_type) {
@@ -228,7 +229,7 @@ read_personalis_small_variant_reports <- function(sample_paths, modality, sample
 #' @param modality modality from which the variants were called. Can be either 'DNA' or 'RNA'
 #' @param report_type report_type which should be read. Can be either 'preferred' or 'all'
 #' @return data frame with all variants
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate rename_with
 #' @keywords internal
 read_personalis_small_variant_report_sample <- function(sample_folder, modality, sample_type, report_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
@@ -237,7 +238,7 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
   sample_name <- basename(sample_folder)
   # determine report folder based on parameter
   report_folder <- ifelse(report_type == "preferred", "Preferred_Transcripts", "All_Transcripts")
-  
+
   # the prefix of the normal filename ends with N rather than T, e.g. K13T -> tumor, K13N -> normal
   # even though they are all in the K13T folder.
   tmp_sample_name <- if_else(sample_type == "normal", sub("T$", "N", sample_name), sample_name)
@@ -314,21 +315,22 @@ read_personalis_somatic_variants_summary_statistics <- function(sample_folder, m
 #' @importFrom rvest read_html html_elements html_nodes html_text
 #' @importFrom tidyr pivot_longer
 #' @importFrom stringr str_to_title
+#' @importFrom dplyr all_of across contains
 read_personalis_variant_calling_summary_statistics <- function(sample_folder, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
   stopifnot("`sample_type` must be one of 'tumor', 'normal', or 'somatic'." = sample_type %in% c("tumor", "normal", "somatic"))
   sample_name <- basename(sample_folder)
-  
+
   html_file <- file.path(
     sample_folder,
     "QC_REPORT",
     sprintf("%s_%s_%s_statistics.html", modality, sample_name, tolower(modality))
   )
-  
+
   # decide based on modality and sample_type which content to read from html
   html_section <- if_else(sample_type == "somatic", "#concordance", sprintf("#%s_%s", str_to_title(sample_type), modality))
   table_number <- if_else(sample_type == "somatic", 1, 2)
-  columns_to_fix <- if(sample_type == 'somatic') c() else c('SNVs', 'Indels', 'Total')
+  columns_to_fix <- if (sample_type == "somatic") c() else c("SNVs", "Indels", "Total")
 
   tables <- read_html(html_file) |>
     html_elements(html_section) |>
@@ -358,6 +360,7 @@ read_personalis_variant_calling_summary_statistics <- function(sample_folder, mo
 #'   'somatic' refers to tumor vs. normal (i.e. somatic mutations only).
 #' @param modality modality from which the variants were called. Can be either 'DNA' or 'RNA'
 #' @return SummarizedExperiment
+#' @importFrom BumpyMatrix splitAsBumpyMatrix
 #' @export
 read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
   stopifnot("`modality` must be one of 'DNA' or 'RNA'." = modality %in% c("DNA", "RNA"))
@@ -368,7 +371,7 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
       summary_stats = read_personalis_variant_calling_summary_statistics(sample, ...)
     )
   }
-  
+
   variant_list <- read_samples(
     sample_paths,
     read_all,
@@ -376,11 +379,11 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
     modality = modality,
     sample_type = sample_type
   )
-  
+
   if (!length(variant_list)) {
     return(NULL)
   }
-  
+
   col_data <- map(variant_list, "summary_stats") |>
     bind_rows() |>
     tibble::column_to_rownames("sample")
@@ -389,14 +392,14 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
   row_data <- all_variants |>
     select(
       mut_id,
-      CHROM, 
-      POS, 
+      CHROM,
+      POS,
       REF,
       ALT
     ) |>
     distinct()
   stopifnot("mut_id is not a unique identifier" = !anyDuplicated(row_data$mut_id))
-  
+
   # ignore columns that are already in `row_data` except for the `mut_id` identifier
   row_data_cols <- colnames(row_data)[colnames(row_data) != "mut_id"]
   all_variants <- all_variants[, !(colnames(all_variants) %in% row_data_cols)]
@@ -410,7 +413,7 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
   # sort row and col data to be consistent with BM
   row_data <- tibble::column_to_rownames(row_data, "mut_id")[rownames(variants_bm), ]
   col_data <- col_data[colnames(variants_bm), ]
-  
+
   se <- SummarizedExperiment(
     assays = list(
       variants = variants_bm
@@ -418,7 +421,6 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
     rowData = row_data,
     colData = col_data
   )
-  
 }
 
 #' Read Personalis (raw) VCF files for a provided folders/multiple samples and merge to one table.
@@ -437,22 +439,21 @@ read_personalis_vcf_files_sample <- function(sample_folder, modality, sample_typ
   # the prefix of the normal filename ends with N rather than T, e.g. K13T -> tumor, K13N -> normal
   # even though they are all in the K13T folder.
   tmp_sample_name <- if_else(sample_type == "normal", sub("T$", "N", sample_name), sample_name)
-  
+
   # tumor DNA VCF files are gzipped, not totally clear if this rule applies to all cases
   file_ending <- if_else(sample_type == "tumor" & modality == "DNA", "vcf.gz", "vcf")
-  
+
   variant_table <- parse_vcf_to_df(
     file.path(
       sample_folder,
       sprintf("%s_Pipeline", modality),
-      "Variants", 
-      sprintf("%s_%s_%s_%s.%s", modality, tmp_sample_name, sample_type, tolower(modality), file_ending
-        )
-      )
-    ) %>% 
-    mutate(sample = sample_name) %>%
+      "Variants",
+      sprintf("%s_%s_%s_%s.%s", modality, tmp_sample_name, sample_type, tolower(modality), file_ending)
+    )
+  ) |>
+    mutate(sample = sample_name) |>
     mutate(mut_id = sprintf("%s_%s_%s_%s", CHROM, POS, REF, ALT))
-  
+
   variant_table
 }
 
@@ -466,6 +467,7 @@ read_personalis_vcf_files_sample <- function(sample_folder, modality, sample_typ
 #' @param sample_paths List of directories with Personalis samples
 #' @importFrom purrr map
 #' @importFrom dplyr bind_rows
+#' @importFrom BumpyMatrix splitAsBumpyMatrix
 #' @export
 read_personalis_cnv_reports <- function(sample_paths) {
   read_all <- function(path) {
@@ -655,6 +657,7 @@ read_personalis_hla_sample <- function(sample_folder) {
 #' @return SummarizedExperiment
 #' @export
 #' @importFrom purrr map
+#' @importFrom BumpyMatrix splitAsBumpyMatrix
 read_personalis_tcr_reports <- function(sample_paths) {
   read_all <- function(path) {
     list(
