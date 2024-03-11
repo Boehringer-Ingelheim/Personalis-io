@@ -98,6 +98,7 @@ read_samples <- function(sample_paths, io_func, description, ...) {
 #' @param col_data {data.frame} data frame that is used as colData (must have rownames that are sample identifiers!)
 #' @param sample_col {character} column in `df` that contains the sample identifier
 #' @return {tibble} new data frame with dummy entries added
+#' @importFrom tibble as_tibble
 #' @keywords internal
 add_dummy_entry <- function(df, col_data, sample_col = "sample") {
   missing_samples <- setdiff(rownames(col_data), unique(df[[sample_col]]))
@@ -122,6 +123,7 @@ add_dummy_entry <- function(df, col_data, sample_col = "sample") {
 #' @importFrom dplyr mutate left_join
 #' @importFrom vcfR read.vcfR vcfR2tidy
 #' @importFrom stringr str_split_i
+#' @importFrom tibble as_tibble
 parse_vcf_to_df <- function(path) {
   # parse VCF file
   vcf_content <- read.vcfR(path)
