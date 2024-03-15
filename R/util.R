@@ -98,6 +98,7 @@ read_samples <- function(sample_paths, io_func, description, ...) {
 #' @param col_data {data.frame} data frame that is used as colData (must have rownames that are sample identifiers!)
 #' @param sample_col {character} column in `df` that contains the sample identifier
 #' @return {tibble} new data frame with dummy entries added
+#' @importFrom tibble as_tibble
 #' @keywords internal
 add_dummy_entry <- function(df, col_data, sample_col = "sample") {
   missing_samples <- setdiff(rownames(col_data), unique(df[[sample_col]]))
@@ -113,4 +114,33 @@ add_dummy_entry <- function(df, col_data, sample_col = "sample") {
     df,
     dummy_entries
   )
+}
+
+#' Parse VCF files for a provided path and construct data frame.
+#'
+#' @param path path to VCF file in `*.vcf` or `*.vcf.gz` format
+#' @return {tibble} new data frame with all variants (fixed field and genotype information)
+#' @importFrom dplyr mutate left_join
+#' @importFrom vcfR read.vcfR vcfR2tidy
+#' @importFrom stringr str_split_i
+#' @importFrom tibble as_tibble
+parse_vcf_to_df <- function(path) {
+  # parse VCF file
+  vcf_content <- read.vcfR(path)
+
+  # fixed field content to data frame
+  fixed_df <- vcfR2tidy(vcf_content)$fix
+
+  # GT content to data frame
+  gt_df <- vcfR2tidy(vcf_content)$gt
+
+  # create addition column with observed nucleotides in order to avoid collisions when we do the left_join
+  gt_df <- gt_df |>
+    dplyr::mutate(ALT = str_split_i(gt_GT_alleles, "/", 2))
+
+  # next use ChromKey, POS and ALT for joining vcf content data frames
+  joined_vcf_df <- fixed_df |>
+    dplyr::left_join(gt_df, by = c("ChromKey", "POS", "ALT"))
+
+  as_tibble(joined_vcf_df)
 }

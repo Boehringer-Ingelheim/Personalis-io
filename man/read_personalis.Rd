@@ -4,10 +4,14 @@
 \alias{read_personalis}
 \title{Read a set of personalis results folders into a MultiAssayExperiment object}
 \usage{
-read_personalis(pathlist)
+read_personalis(pathlist, report_type = "preferred", read_vcf_data = FALSE)
 }
 \arguments{
 \item{pathlist}{List with paths to Personalis results folders}
+
+\item{report_type}{Type of small variant report that should be read (default: preferred)}
+
+\item{read_vcf_data}{Boolean to specify if VCF file should be read in as well (default: FALSE)}
 }
 \value{
 MultiAssayExperiment

@@ -1,13 +1,14 @@
 Package: PersonalisIO
 Title: Read Personalis data into MultiAssayExperiment objects
-Version: 0.2.0.9000
+Version: 0.3.0.9000
 Authors@R: 
     person("Gregor", "Sturm", , "gregor.sturm@boehringer-ingelheim.com", role = c("aut", "cre"))
 Description: This package provides convenience functions for reading real-world evidence data provided by Personalis into Bioconductor MultiAssayExperiment objects.
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
-Depends:
+Imports:
+    dplyr,
     SummarizedExperiment,
     readxl,
     MultiAssayExperiment,
@@ -15,9 +16,10 @@ Depends:
     pbapply,
     tidyr,
     purrr,
-    dplyr,
     BumpyMatrix,
-    rvest
+    rvest,
+    stringr, 
+    vcfR
 Suggests: 
     knitr,
     rmarkdown,
