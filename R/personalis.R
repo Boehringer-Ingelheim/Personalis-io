@@ -331,11 +331,15 @@ read_personalis_variant_calling_summary_statistics <- function(sample_folder, mo
   html_section <- if_else(sample_type == "somatic", "#concordance", sprintf("#%s_%s", str_to_title(sample_type), modality))
   table_number <- if_else(sample_type == "somatic", 1, 2)
   columns_to_fix <- if (sample_type == "somatic") c() else c("SNVs", "Indels", "Total")
-
+  
   tables <- read_html(html_file) |>
     html_elements(html_section) |>
     html_elements("table") |>
     html_table(na.strings = "N/A")
+  
+  if (!length(tables)) {
+    return(tibble())
+  } else {
   tes <- tables[table_number] |>
     lapply(function(df) {
       colnames(df) <- make.names(colnames(df))
@@ -350,6 +354,7 @@ read_personalis_variant_calling_summary_statistics <- function(sample_folder, mo
     select(sample, var_name, value) |>
     pivot_wider(id_cols = sample, names_from = "var_name", values_from = "value") |>
     mutate(across(contains("Number"), fix_thousands_separator))
+  }
 }
 
 #' Read in (unfiltered) small variant data from VCF files from personalis folders
@@ -379,15 +384,16 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
     modality = modality,
     sample_type = sample_type
   )
-
   if (!length(variant_list)) {
     return(NULL)
   }
 
-  col_data <- map(variant_list, "summary_stats") |>
-    bind_rows() |>
-    tibble::column_to_rownames("sample")
-
+  col_data <- bind_rows(map(variant_list, "summary_stats"))
+  if (nrow(col_data)) {
+    col_data <- col_data |>
+      tibble::column_to_rownames("sample")
+  }
+  
   all_variants <- map(variant_list, "vcf_data") |> bind_rows()
   row_data <- all_variants |>
     select(
@@ -440,19 +446,20 @@ read_personalis_vcf_files_sample <- function(sample_folder, modality, sample_typ
   # even though they are all in the K13T folder.
   tmp_sample_name <- if_else(sample_type == "normal", sub("T$", "N", sample_name), sample_name)
 
-  # tumor DNA VCF files are gzipped, not totally clear if this rule applies to all cases
-  file_ending <- if_else(sample_type == "tumor" & modality == "DNA", "vcf.gz", "vcf")
-
   variant_table <- parse_vcf_to_df(
     file.path(
       sample_folder,
       sprintf("%s_Pipeline", modality),
       "Variants",
-      sprintf("%s_%s_%s_%s.%s", modality, tmp_sample_name, sample_type, tolower(modality), file_ending)
+      sprintf("%s_%s_%s_%s.%s", modality, tmp_sample_name, sample_type, tolower(modality), "vcf.gz")
     )
-  ) |>
-    mutate(sample = sample_name) |>
-    mutate(mut_id = sprintf("%s_%s_%s_%s", CHROM, POS, REF, ALT))
+  )
+  
+  if (nrow(variant_table)) {
+    variant_table <- variant_table |> 
+      mutate(sample = sample_name) |>
+      mutate(mut_id = sprintf("%s_%s_%s_%s", CHROM, POS, REF, ALT))
+  }
 
   variant_table
 }
