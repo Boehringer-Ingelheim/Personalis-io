@@ -127,23 +127,26 @@ add_dummy_entry <- function(df, col_data, sample_col = "sample") {
 #' @importFrom tibble as_tibble
 parse_vcf_to_df <- function(path) {
   # parse VCF file
-  vcf_content <- tryCatch({
-    read.vcfR(path) 
-  }, error = function(e) {
-      read.vcfR(str_replace(path, "vcf.gz", "vcf"))
+  vcf_content <- tryCatch(
+    {
+      read.vcfR(path, verbose = FALSE)
+    },
+    error = function(e) {
+      read.vcfR(str_replace(path, "vcf.gz", "vcf"), verbose = FALSE)
     }
   )
-  
+
+  tidy_vcf <- vcfR2tidy(vcf_content, verbose = FALSE)
   # fixed field content to data frame
-  fixed_df <- vcfR2tidy(vcf_content)$fix
+  fixed_df <- tidy_vcf$fix
 
   # GT content to data frame
-  gt_df <- vcfR2tidy(vcf_content)$gt
-  
+  gt_df <- tidy_vcf$gt
+
   # create addition column with observed nucleotides in order to avoid collisions when we do the left_join
   gt_df <- gt_df |>
     dplyr::mutate(ALT = str_split_i(gt_GT_alleles, "/", 2))
-  
+
   # next use ChromKey, POS and ALT for joining vcf content data frames
   joined_vcf_df <- fixed_df |>
     dplyr::left_join(gt_df, by = c("ChromKey", "POS", "ALT"))
