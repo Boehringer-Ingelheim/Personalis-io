@@ -255,7 +255,10 @@ read_personalis_small_variant_report_sample <- function(sample_folder, modality,
     mutate(sample = sample_name) |>
     # in older versions, the "Chromosome" column is called "Sequence"
     rename_with(\(x) if_else(x == "Sequence", "Chromosome", x)) |>
-    mutate(mut_id = sprintf("%s_%s_%s", Chromosome, `Genomic Variant`, `Variant Type`))
+    mutate(mut_id = sprintf("%s_%s_%s", Chromosome, `Genomic Variant`, `Variant Type`)) |>
+    mutate(`Variant ID` = as.character(`Variant ID`)) |>
+    mutate(`dbSNP Build` = as.character(`dbSNP Build`))
+
 
   variant_table
 }
@@ -331,29 +334,29 @@ read_personalis_variant_calling_summary_statistics <- function(sample_folder, mo
   html_section <- if_else(sample_type == "somatic", "#concordance", sprintf("#%s_%s", str_to_title(sample_type), modality))
   table_number <- if_else(sample_type == "somatic", 1, 2)
   columns_to_fix <- if (sample_type == "somatic") c() else c("SNVs", "Indels", "Total")
-  
+
   tables <- read_html(html_file) |>
     html_elements(html_section) |>
     html_elements("table") |>
     html_table(na.strings = "N/A")
-  
+
   if (!length(tables)) {
     return(tibble())
   } else {
-  tes <- tables[table_number] |>
-    lapply(function(df) {
-      colnames(df) <- make.names(colnames(df))
-      colnames(df)[1] <- "metric"
-      df |>
-        mutate(across(all_of(columns_to_fix), fix_thousands_separator))
-    }) |>
-    bind_rows() |>
-    pivot_longer(-metric, names_to = "mut_type", values_to = "value") |>
-    mutate(sample = sample_name) |>
-    mutate(var_name = sprintf("%s (%s)", metric, mut_type)) |>
-    select(sample, var_name, value) |>
-    pivot_wider(id_cols = sample, names_from = "var_name", values_from = "value") |>
-    mutate(across(contains("Number"), fix_thousands_separator))
+    tes <- tables[table_number] |>
+      lapply(function(df) {
+        colnames(df) <- make.names(colnames(df))
+        colnames(df)[1] <- "metric"
+        df |>
+          mutate(across(all_of(columns_to_fix), fix_thousands_separator))
+      }) |>
+      bind_rows() |>
+      pivot_longer(-metric, names_to = "mut_type", values_to = "value") |>
+      mutate(sample = sample_name) |>
+      mutate(var_name = sprintf("%s (%s)", metric, mut_type)) |>
+      select(sample, var_name, value) |>
+      pivot_wider(id_cols = sample, names_from = "var_name", values_from = "value") |>
+      mutate(across(contains("Number"), fix_thousands_separator))
   }
 }
 
@@ -393,7 +396,7 @@ read_personalis_vcf_files <- function(sample_paths, modality, sample_type) {
     col_data <- col_data |>
       tibble::column_to_rownames("sample")
   }
-  
+
   all_variants <- map(variant_list, "vcf_data") |> bind_rows()
   row_data <- all_variants |>
     select(
@@ -454,9 +457,9 @@ read_personalis_vcf_files_sample <- function(sample_folder, modality, sample_typ
       sprintf("%s_%s_%s_%s.%s", modality, tmp_sample_name, sample_type, tolower(modality), "vcf.gz")
     )
   )
-  
+
   if (nrow(variant_table)) {
-    variant_table <- variant_table |> 
+    variant_table <- variant_table |>
       mutate(sample = sample_name) |>
       mutate(mut_id = sprintf("%s_%s_%s_%s", CHROM, POS, REF, ALT))
   }
