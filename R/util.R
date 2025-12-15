@@ -27,7 +27,7 @@ catch_file_not_found <- function(path, callback, ...) {
       if (
         # List of erorr messages to catch
         grepl("`path` does not exist: .*", conditionMessage(e)) || # from read_excel
-          grepl("'.*?' does not exist.", conditionMessage(e)) || # from read_html
+          grepl("does not exist\\.$", conditionMessage(e)) || # from read_html
           grepl("cannot open the connection", conditionMessage(e)) # from read.vcfR
       ) {
         return(NULL)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/personalis.R
 \name{read_personalis_tcr_clone_report_sample}
 \alias{read_personalis_tcr_clone_report_sample}
-\title{Read TCRs for a single sample.}
+\title{Read TCRs for a single sample}
 \usage{
 read_personalis_tcr_clone_report_sample(sample_folder)
 }
@@ -10,6 +10,6 @@ read_personalis_tcr_clone_report_sample(sample_folder)
 data frame with one row per TCR clone
 }
 \description{
-Read TCRs for a single sample.
+Read TCRs for a single sample
 }
 \keyword{internal}
