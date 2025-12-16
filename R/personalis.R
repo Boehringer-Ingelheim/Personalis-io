@@ -61,6 +61,9 @@ read_personalis <- function(pathlist, report_type = "preferred", read_vcf_data =
   message(">>> Reading TCR clone reports... ")
   experiments[["tcr"]] <- read_personalis_tcr_reports(pathlist)
 
+  message(">>> Reading BCR clone reports... ")
+  experiments[["bcr"]] <- read_personalis_bcr_reports(pathlist)
+
   mae <- MultiAssayExperiment(
     # remove experiments with no samples (=NULL)
     experiments = experiments[!is.null(experiments)]
@@ -700,7 +703,7 @@ read_personalis_tcr_reports <- function(sample_paths) {
 }
 
 
-#' Read TCRs for a single sample.
+#' Read TCRs for a single sample
 #' @return data frame with one row per TCR clone
 #' @importFrom dplyr if_else bind_rows
 #' @keywords internal
@@ -708,14 +711,27 @@ read_personalis_tcr_clone_report_sample <- function(sample_folder) {
   sample_name <- basename(sample_folder)
   tcr_df <- lapply(c("TRA", "TRB"), function(locus) {
     locus_file_name <- if_else(locus == "TRA", "tcr_alpha", "tcr_beta")
+
+    # Try RNA_TCR_BCR folder first
     tcr_file <- file.path(
       sample_folder,
-      "RNA_TCR",
+      "RNA_TCR_BCR",
       "Immune_Repertoire",
-      sprintf("RNA_%s_rna_%s_clone_report.xlsx", sample_name, locus_file_name)
+      sprintf("RNA_%s_%s_clone_report.xlsx", sample_name, locus_file_name)
     )
+
     if (!file.exists(tcr_file)) {
-      # try alternative path
+      # Try RNA_TCR folder
+      tcr_file <- file.path(
+        sample_folder,
+        "RNA_TCR",
+        "Immune_Repertoire",
+        sprintf("RNA_%s_rna_%s_clone_report.xlsx", sample_name, locus_file_name)
+      )
+    }
+
+    if (!file.exists(tcr_file)) {
+      # try alternative path in RNA_TCR
       tcr_file <- file.path(
         sample_folder,
         "RNA_TCR",
@@ -723,6 +739,7 @@ read_personalis_tcr_clone_report_sample <- function(sample_folder) {
         sprintf("RNA_%s_%s_clone_report.xlsx", sample_name, locus_file_name)
       )
     }
+
     read_excel(tcr_file, guess_max = GUESS_MAX) |>
       mutate(locus = locus, sample = sample_name)
   }) |> bind_rows()
@@ -749,6 +766,179 @@ read_personalis_tcr_summary_statistics <- function(sample_folder) {
     sample = sample_name,
     clonality_alpha = clonality_alpha$X2[1],
     clonality_beta = clonality_beta$X2[1],
+  )
+}
+
+
+#
+# -------------------- BCR --------------------------
+#
+
+#' Read BCR clone report for a list of samples
+#' @param sample_paths List of paths to read
+#' @return SummarizedExperiment
+#' @export
+#' @importFrom purrr map
+#' @importFrom BumpyMatrix splitAsBumpyMatrix
+read_personalis_bcr_reports <- function(sample_paths) {
+  read_all <- function(path) {
+    list(
+      clone_report = read_personalis_bcr_clone_report_sample(path),
+      isotype_composition = read_personalis_bcr_isotype_composition_sample(path),
+      summary_stats = read_personalis_bcr_summary_statistics(path)
+    )
+  }
+  bcr_list <- read_samples(sample_paths, read_all, "BCR")
+
+  # Merge summary stats and isotype composition
+  isotype_composition <- dplyr::bind_rows(map(bcr_list, "isotype_composition"))
+  summary_stats <- dplyr::bind_rows(map(bcr_list, "summary_stats"))
+  col_data <- dplyr::left_join(summary_stats, isotype_composition, by = "sample")
+
+  if (nrow(col_data) == 0) {
+    return(NULL)
+  }
+
+  col_data <- col_data |> tibble::column_to_rownames("sample")
+
+  all_bcr <- dplyr::bind_rows(map(bcr_list, "clone_report"))
+  bcr_bm <- splitAsBumpyMatrix(
+    all_bcr,
+    row = all_bcr$chain,
+    column = all_bcr$sample,
+    sparse = FALSE
+  )
+  col_data <- col_data[colnames(bcr_bm), ]
+  se <- SummarizedExperiment(
+    assays = list(bcr = bcr_bm),
+    colData = col_data
+  )
+}
+
+
+#' Read BCRs for a single sample.
+#' @return data frame with one row per BCR clone
+#' @importFrom dplyr bind_rows
+#' @keywords internal
+read_personalis_bcr_clone_report_sample <- function(sample_folder) {
+  sample_name <- basename(sample_folder)
+
+  # Try RNA_TCR_BCR folder first
+  bcr_file <- file.path(
+    sample_folder,
+    "RNA_TCR_BCR",
+    "Immune_Repertoire",
+    sprintf("RNA_%s_bcr_heavy_chain_report.xlsx", sample_name)
+  )
+
+  if (!file.exists(bcr_file)) {
+    # Try RNA_BCR folder
+    bcr_file <- file.path(
+      sample_folder,
+      "RNA_BCR",
+      "Immune_Repertoire",
+      sprintf("RNA_%s_bcr_heavy_chain_report.xlsx", sample_name)
+    )
+  }
+
+  if (!file.exists(bcr_file)) {
+    # Try alternative naming pattern in RNA_TCR_BCR
+    bcr_file <- file.path(
+      sample_folder,
+      "RNA_TCR_BCR",
+      "Immune_Repertoire",
+      sprintf("RNA_%s_rna_bcr_heavy_chain_report.xlsx", sample_name)
+    )
+  }
+
+  if (!file.exists(bcr_file)) {
+    return(tibble(chain = character(), sample = character()))
+  }
+
+  bcr_df <- read_excel(bcr_file, guess_max = GUESS_MAX) |>
+    mutate(chain = "IGH", sample = sample_name)
+
+  bcr_df
+}
+
+#' Read BCR isotype composition for a single sample
+#' @return data frame with isotype composition statistics
+#' @importFrom readxl read_excel
+#' @importFrom tidyr pivot_wider
+#' @keywords internal
+read_personalis_bcr_isotype_composition_sample <- function(sample_folder) {
+  sample_name <- basename(sample_folder)
+
+  # Try RNA_TCR_BCR folder first
+  isotype_file <- file.path(
+    sample_folder,
+    "RNA_TCR_BCR",
+    "Immune_Repertoire",
+    sprintf("RNA_%s_bcr_isotype_composition.xlsx", sample_name)
+  )
+
+  if (!file.exists(isotype_file)) {
+    # Try RNA_BCR folder
+    isotype_file <- file.path(
+      sample_folder,
+      "RNA_BCR",
+      "Immune_Repertoire",
+      sprintf("RNA_%s_bcr_isotype_composition.xlsx", sample_name)
+    )
+  }
+
+  if (!file.exists(isotype_file)) {
+    # Try alternative naming pattern in RNA_TCR_BCR
+    isotype_file <- file.path(
+      sample_folder,
+      "RNA_TCR_BCR",
+      "Immune_Repertoire",
+      sprintf("RNA_%s_rna_bcr_isotype_composition.xlsx", sample_name)
+    )
+  }
+
+  if (!file.exists(isotype_file)) {
+    return(tibble(sample = sample_name))
+  }
+
+  isotype_df <- read_excel(isotype_file, guess_max = GUESS_MAX)
+
+  # Convert isotype composition to wide format for colData
+  isotype_wide <- isotype_df |>
+    pivot_wider(
+      names_from = names(isotype_df)[2], # Second column is isotype name
+      values_from = names(isotype_df)[1] # First column is the fraction value
+    ) |>
+    mutate(sample = sample_name)
+
+  isotype_wide
+}
+
+#' Extract summary statistics from the BCR HTML report
+#' @return data frame
+#' @importFrom rvest read_html html_elements html_table
+#' @keywords internal
+read_personalis_bcr_summary_statistics <- function(sample_folder) {
+  sample_name <- basename(sample_folder)
+  html_file <- file.path(
+    sample_folder,
+    "QC_REPORT",
+    sprintf("RNA_%s_bcr_statistics.html", sample_name)
+  )
+  html <- read_html(html_file)
+  clonality_bcrh <- (html |> html_elements("#bcr_overview") |> html_elements("table") |> html_table())[[1]]
+  clonality_iga <- (html |> html_elements("#iga_overview") |> html_elements("table") |> html_table())[[1]]
+  clonality_igd <- (html |> html_elements("#igd_overview") |> html_elements("table") |> html_table())[[1]]
+  clonality_igg <- (html |> html_elements("#igg_overview") |> html_elements("table") |> html_table())[[1]]
+  clonality_igm <- (html |> html_elements("#igm_overview") |> html_elements("table") |> html_table())[[1]]
+
+  tibble(
+    sample = sample_name,
+    clonality_bcrh = clonality_bcrh$X2[1],
+    clonality_iga = clonality_iga$X2[1],
+    clonality_igd = clonality_igd$X2[1],
+    clonality_igg = clonality_igg$X2[1],
+    clonality_igm = clonality_igm$X2[1]
   )
 }
 
